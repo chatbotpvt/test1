@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CoachX - Asistente para Modelos Webcam</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .chat-box {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      width: 420px;
+      padding: 20px;
+    }
+    .chat-log {
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      background-color: #fff;
+    }
+    .chat-input {
+      display: flex;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px 0 0 6px;
+    }
+    .chat-input button {
+      padding: 10px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 0 6px 6px 0;
+      cursor: pointer;
+    }
+    .message {
+      margin-bottom: 8px;
+    }
+    .bot {
+      color: #007bff;
+    }
+    .user {
+      color: #111;
+    }
+  </style>
+</head>
+<body>
+<div class="chat-box">
+  <h2>CoachX - Tu Asistente en Vivo</h2>
+  <div id="chat-log" class="chat-log"></div>
+  <div class="chat-input">
+    <input type="text" id="user-input" placeholder="Escribe aquí tu duda o situación...">
+    <button onclick="sendMessage()">Enviar</button>
+  </div>
+</div>
+
+<script>
+  const log = document.getElementById("chat-log");
+  const input = document.getElementById("user-input");
+
+  function printMessage(sender, text, className) {
+    const message = document.createElement("div");
+    message.className = `message ${className}`;
+    message.innerHTML = `<strong>${sender}:</strong> ${text}`;
+    log.appendChild(message);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  async function sendMessage() {
+    const msg = input.value.trim();
+    if (!msg) return;
+    printMessage("Tú", msg, "user");
+    input.value = "";
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer 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"
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "system", content: "Eres un asistente virtual para modelos webcam. Da consejos sobre cómo conectar con los usuarios, aumentar ventas, y mantener la energía en el show." },
+                  { role: "user", content: msg }]
+      })
+    });
+
+    const data = await response.json();
+    const botReply = data.choices?.[0]?.message?.content || "No entendí eso, intenta de nuevo.";
+    printMessage("CoachX", botReply, "bot");
+  }
+</script>
+</body>
+</html>
+
